@@ -12,7 +12,7 @@
     <span class="logo">✦</span>
     <div>
       <h1>虚拟主播</h1>
-      <p>闲聊、玩游戏、讲书，上传一张图就能开播</p>
+      <p>闲聊、玩游戏、讲书。图、数据库、游戏，有一样就能开播</p>
     </div>
   </div>
   <div class="top-actions">
@@ -24,7 +24,7 @@
 <main class="wrap">
   <section class="hero">
     <h2>打开就能播</h2>
-    <p>双击「打开.bat」。可以闲聊，也可以在玩游戏时把她放在旁边。上传一张图，点开始直播，会弹出舞台并生成「直播间」文件夹。不会操作的话，打开项目里的「教程.md」。</p>
+      <p>三样里有一样就能开始：一张人物图，或一份数据库，或一个游戏。点「开始直播」会弹出舞台。不会操作的话，打开项目里的「教程.md」。</p>
   </section>
 
   <ol class="steps">
@@ -56,7 +56,8 @@
     <li class="card">
       <div class="step-no">02</div>
       <h3>数据库和接口，都在这个文件夹</h3>
-      <p class="lead">不用另找配置。钥匙写在你自己电脑的 <code>.env</code> 里，不会写进要上传的文件。玩游戏和闲聊不用准备书库；只有选「讲书」才会用到目录。</p>
+      <p class="lead">三样不用齐。有人物图就出形象，有数据库就能讲书，有游戏就会把游戏一起打开。钥匙写在你自己电脑的 <code>.env</code> 里，不会写进要上传的文件。</p>
+      <ul class="paths" id="ready"></ul>
       <label>这次直播做什么
         <select id="in-mode">
           <option value="chat">闲聊。接弹幕，不讲书</option>
@@ -69,11 +70,26 @@
         <label>DeepSeek API Key
           <input id="in-key" type="password" placeholder="sk-… 留空则不修改" autocomplete="off" />
         </label>
-        <label>B 站直播间号
-          <input id="in-room" type="number" placeholder="例如 123456" />
+        <label>弹幕平台
+          <select id="in-platform">
+            <option value="off">不接弹幕</option>
+            <option value="bilibili">哔哩哔哩</option>
+            <option value="youtube">YouTube</option>
+            <option value="twitch">Twitch</option>
+            <option value="kick">Kick</option>
+            <option value="douyu">斗鱼</option>
+          </select>
+        </label>
+        <label>直播间
+          <input id="in-room" type="text" placeholder="房间号、频道名或直播网址" />
         </label>
       </div>
+      <p class="hint" id="room-hint"></p>
+      <label>游戏程序
+        <input id="in-game" type="text" placeholder="可以不填。要一起打开游戏时，选它的 .exe" />
+      </label>
       <div class="row">
+        <button class="btn" id="btn-game" type="button">选择游戏</button>
         <button class="btn" id="btn-save">保存到这个文件夹</button>
         <span class="hint" id="save-hint"></span>
       </div>
@@ -82,7 +98,7 @@
     <li class="card">
       <div class="step-no">03</div>
       <h3>开始直播</h3>
-      <p class="lead">弹出 1920×1080 的舞台窗口，并在项目里生成「直播间」文件夹。下次双击里面的「开始直播.bat」即可，不必重新上传。</p>
+      <p class="lead">上面三样里有一样就能点。会弹出舞台，并生成「直播间」文件夹。选了游戏的话，游戏会一起打开。下次双击文件夹里的「开始直播.bat」。</p>
       <div class="row">
         <button class="btn primary" id="btn-live" disabled>开始直播</button>
         <button class="btn ghost" id="btn-folder" hidden>打开直播间文件夹</button>

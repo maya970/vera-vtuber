@@ -2,6 +2,21 @@ const $ = (id) => document.getElementById(id);
 let firstLoad = true;
 let logSince = 0;
 
+const ROOM_HINT = {
+  off: "不接弹幕。推流仍然是把网页推进 OBS 或各平台的直播工具。",
+  bilibili: "填 B 站房间号，或直播间网址。一直没有弹幕时再补下面的 Cookie。",
+  youtube: "填直播网址、视频号，或 @频道。公开直播不用另办钥匙。",
+  twitch: "填频道名，或 twitch.tv/频道。公开聊天不用登录。",
+  kick: "填频道名，或 kick.com/频道。",
+  douyu: "填房间号，或斗鱼直播间网址。",
+};
+
+function roomHint() {
+  const el = $('room-hint');
+  if (!el) return;
+  el.textContent = ROOM_HINT[$('in-platform').value] || "";
+}
+
 function setTag(el, text, cls) {
   el.textContent = text;
   el.className = 'tag' + (cls ? ' ' + cls : '');
@@ -18,7 +33,10 @@ async function loadState() {
     const s = await getJSON('/api/state');
     const cfg = s.config;
     if (firstLoad) {
-      $('in-room').value = cfg.bilibili.room_id || '';
+      const live = s.chat || s.bili || {};
+      if ($('in-platform')) $('in-platform').value = live.platform || (cfg.chat && cfg.chat.platform) || 'bilibili';
+      $('in-room').value = live.target || (cfg.chat && cfg.chat.target) || '';
+      if ($('room-hint')) roomHint();
       $('in-sess').placeholder = cfg.bilibili.sessdata_set ? '已设置，留空不修改' : '可选：登录 Cookie';
       $('in-key').placeholder = cfg.deepseek.api_key_set ? '已设置，留空不修改' : 'sk-… 未设置时用本地兜底话术';
       $('in-idle').value = cfg.director.idle_book_after;
@@ -107,8 +125,9 @@ function renderPlayed(items) {
 async function saveConfig() {
   const hint = $('save-hint');
   const patch = {
-    bilibili: {
-      room_id: Number($('in-room').value || 0),
+    chat: {
+      platform: $('in-platform') ? $('in-platform').value : 'bilibili',
+      target: $('in-room').value.trim(),
     },
     tts: { voice: $('in-voice').value },
     director: {
@@ -117,7 +136,7 @@ async function saveConfig() {
     },
   };
   if ($('in-key').value.trim()) patch.deepseek = { api_key: $('in-key').value.trim() };
-  if ($('in-sess').value.trim()) patch.bilibili.sessdata = $('in-sess').value.trim();
+  if ($('in-sess').value.trim()) patch.bilibili = { sessdata: $('in-sess').value.trim() };
   try {
     await getJSON('/api/config', {
       method: 'POST',
@@ -202,7 +221,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     $('in-dm').value = '';
   };
   $('btn-next').onclick = () => action('/api/next', null, $('btn-next'));
-  $('btn-bili').onclick = () => action('/api/bili/restart', null, $('btn-bili'));
+  $('btn-bili').onclick = () => action('/api/chat/restart', null, $('btn-bili'));
+  if ($('in-platform')) $('in-platform').addEventListener('change', roomHint);
   $('btn-reload').onclick = () => action('/api/catalog/reload', null, $('btn-reload'));
 
   $('in-say').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-say').click(); });

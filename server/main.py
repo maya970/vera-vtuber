@@ -9,14 +9,16 @@ from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .brain import brain
 from .catalog import Catalog
 from .config import ROOT, config, stream_mode
-from .danmaku import BiliDanmaku, DanmakuEvent
+from .chat import PLATFORMS, ChatHub
+from .danmaku import DanmakuEvent
+from .sources.parse import bili_room
 from .director import Director, StageHub
 from .store import store
 from . import studio
@@ -70,7 +72,7 @@ async def _bili_callback(ev: DanmakuEvent) -> None:
     await director.on_event(ev)
 
 
-bili = BiliDanmaku(_bili_callback)
+chat = ChatHub(_bili_callback)
 
 
 def load_manifest() -> dict | None:
@@ -94,14 +96,13 @@ async def lifespan(app: FastAPI):
     except Exception as exc:  # noqa: BLE001
         log.warning("StandRig 交接文件没有写好：%s", exc)
     await director.start()
-    if config.get("bilibili.enable") and int(config.get("bilibili.room_id") or 0):
-        await bili.start()
+    await chat.start()
     log.info("薇拉已就绪：http://%s:%s", config.get("server.host"), config.get("server.port"))
     try:
         yield
     finally:
         await director.stop()
-        await bili.stop()
+        await chat.stop()
 
 
 app = FastAPI(title="薇拉 · 书库直播间", lifespan=lifespan)
@@ -132,7 +133,8 @@ async def panel() -> FileResponse:
 async def api_state() -> dict:
     return {
         "director": director.state(),
-        "bili": bili.state(),
+        "bili": chat.state(),
+        "chat": chat.state(),
         "catalog": catalog.stats(),
         "brain_ready": brain.ready,
         "tts_voice": tts.voice,
@@ -169,8 +171,26 @@ async def api_catalog_reload() -> dict:
 @app.post("/api/config")
 async def api_config(request: Request) -> dict:
     patch = await request.json()
-    allowed = {"deepseek", "bilibili", "tts", "director", "avatar", "ui", "catalog"}
+    allowed = {"deepseek", "bilibili", "tts", "director", "avatar", "ui", "catalog", "game", "chat", "twitch", "youtube"}
     patch = {k: v for k, v in (patch or {}).items() if k in allowed}
+    if "chat" in patch:
+        incoming = patch.get("chat") or {}
+        platform = str(incoming.get("platform") or "off").strip().lower()
+        if platform not in PLATFORMS:
+            raise HTTPException(status_code=400, detail="不认识这个弹幕平台")
+        target = str(incoming.get("target") or "").strip()
+        patch["chat"] = {"platform": platform, "target": target}
+        if platform == "bilibili":
+            patch.setdefault("bilibili", {})["room_id"] = bili_room(target)
+    if "twitch" in patch and not str((patch.get("twitch") or {}).get("token") or "").strip():
+        patch.pop("twitch", None)
+    if "youtube" in patch and not str((patch.get("youtube") or {}).get("api_key") or "").strip():
+        patch.pop("youtube", None)
+    if "game" in patch:
+        exe = str((patch.get("game") or {}).get("exe") or "").strip().strip('"')
+        if exe and (Path(exe).suffix.lower() != ".exe" or not Path(exe).is_file()):
+            raise HTTPException(status_code=400, detail="请选择一个存在的游戏程序（.exe）")
+        patch["game"] = {"exe": exe}
     if "deepseek" in patch and "api_key" in patch["deepseek"] and not patch["deepseek"]["api_key"]:
         patch["deepseek"].pop("api_key")
     if "bilibili" in patch and "sessdata" in patch["bilibili"] and not patch["bilibili"]["sessdata"]:
@@ -180,7 +200,8 @@ async def api_config(request: Request) -> dict:
     if stream_mode() != "book":
         await hub.broadcast({"type": "book", "action": "hide"})
     await hub.broadcast({"type": "config", "config": config.public()})
-    return {"ok": True, "config": config.public()}
+    await chat.restart()
+    return {"ok": True, "config": config.public(), "chat": chat.state()}
 
 
 @app.post("/api/say")
@@ -216,17 +237,17 @@ async def api_test_danmaku(request: Request) -> dict:
 
 
 @app.post("/api/bili/restart")
+@app.post("/api/chat/restart")
 async def api_bili_restart() -> dict:
-    await bili.stop()
-    bili.room_id = int(config.get("bilibili.room_id") or 0)
-    await bili.start()
-    return {"ok": True, "bili": bili.state()}
+    await chat.restart()
+    return {"ok": True, "bili": chat.state(), "chat": chat.state()}
 
 
 @app.post("/api/bili/stop")
+@app.post("/api/chat/stop")
 async def api_bili_stop() -> dict:
-    await bili.stop()
-    return {"ok": True, "bili": bili.state()}
+    await chat.stop()
+    return {"ok": True, "bili": chat.state(), "chat": chat.state()}
 
 
 @app.get("/api/health")
@@ -236,7 +257,7 @@ async def api_health() -> dict:
     return {
         "deepseek": {"ok": brain_ok, "message": brain_msg},
         "tts": {"ok": tts_ok, "message": tts_msg},
-        "bili": bili.state(),
+        "bili": chat.state(),
         "catalog": catalog.stats(),
     }
 
@@ -278,7 +299,7 @@ async def ws_endpoint(ws: WebSocket) -> None:
             "config": config.public(),
             "manifest": load_manifest(),
             "state": director.state(),
-            "bili": bili.state(),
+            "bili": chat.state(),
             "catalog": catalog.stats(),
         }
     )
@@ -299,7 +320,7 @@ async def ws_endpoint(ws: WebSocket) -> None:
                         "config": config.public(),
                         "manifest": load_manifest(),
                         "state": director.state(),
-                        "bili": bili.state(),
+                        "bili": chat.state(),
                         "catalog": catalog.stats(),
                     }
                 )

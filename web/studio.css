@@ -121,6 +121,8 @@ input:focus, select:focus { border-color: rgba(232,195,122,0.45); }
   background: rgba(255,255,255,0.03);
 }
 .paths code { color: var(--gold); font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+.paths li.yes code { color: var(--ok, #8dcb8a); }
+.paths li.no code { color: rgba(255,255,255,0.4); }
 .paths em { color: var(--muted); font-style: normal; }
 
 .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

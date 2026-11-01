@@ -14,7 +14,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 
-from .config import ROOT, config
+from .chat import resolve as chat_resolve
+from .config import ROOT, config, stream_mode
 
 log = logging.getLogger("vera.studio")
 router = APIRouter()
@@ -135,6 +136,75 @@ def _mb(path: Path) -> str:
     return f"{path.stat().st_size / 1024 / 1024:.1f} MB"
 
 
+def can_start_with(image: bool, database: bool, game: bool) -> bool:
+    """三样里有一样就能开始。"""
+    return bool(image or database or game)
+
+
+def database_ready() -> tuple[bool, int]:
+    catalog = ROOT / str(config.get("catalog.path", "data/catalog.json"))
+    count = int((_stats() or {}).get("count") or 0)
+    if count <= 0 and catalog.is_file():
+        try:
+            raw = json.loads(catalog.read_text(encoding="utf-8"))
+            books = raw.get("books", raw if isinstance(raw, list) else [])
+            count = len(books) if isinstance(books, list) else 0
+        except (OSError, json.JSONDecodeError):
+            count = 0
+    return catalog.is_file() and count > 0, count
+
+
+def game_exe() -> Path | None:
+    raw = str(config.get("game.exe") or "").strip().strip('"')
+    if not raw:
+        return None
+    path = Path(raw)
+    if path.is_file() and path.suffix.lower() == ".exe":
+        return path
+    return None
+
+
+def start_basis() -> dict:
+    manifest = _manifest()
+    image = bool(manifest and manifest.get("layers"))
+    database, books = database_ready()
+    exe = game_exe()
+    game = exe is not None
+    return {
+        "image": image,
+        "database": database,
+        "game": game,
+        "ok": can_start_with(image, database, game),
+        "books": books,
+        "game_name": exe.name if exe else "",
+        "exe": str(exe) if exe else "",
+    }
+
+
+def launch_game() -> dict:
+    """打开已选的游戏。没选时什么都不做。"""
+    exe = game_exe()
+    if exe is None:
+        return {"launched": False, "exe": "", "pid": 0}
+    proc = subprocess.Popen([str(exe)], cwd=str(exe.parent))  # noqa: S603
+    log.info("已打开游戏：%s", exe.name)
+    return {"launched": True, "exe": str(exe), "pid": proc.pid}
+
+
+def _focus_single(basis: dict) -> str:
+    """只准备了一样时，用这一样来开播。多了就不改用户选的类型。"""
+    flags = [name for name in ("image", "database", "game") if basis.get(name)]
+    mode = stream_mode()
+    if flags == ["database"]:
+        mode = "book"
+    elif flags == ["game"]:
+        mode = "game"
+    if mode != stream_mode():
+        config.set("director.mode", mode)
+        config.save()
+    return mode
+
+
 def build_info() -> dict:
     manifest = _manifest()
     psd = _latest_psd()
@@ -168,6 +238,8 @@ def build_info() -> dict:
             "persona": "config/persona.md",
             "api_key_set": bool(config.get("deepseek.api_key")),
             "room_id": int(config.get("bilibili.room_id") or 0),
+            "platform": chat_resolve()[0],
+            "target": chat_resolve()[1],
             "mode": str(config.get("director.mode") or "chat"),
         },
         "standrig": {
@@ -184,6 +256,8 @@ def build_info() -> dict:
             "dir": str(SHOW_DIR),
             "ready": (SHOW_DIR / "开始直播.bat").exists(),
         },
+        "game": {"exe": str(config.get("game.exe") or ""), "name": game_exe().name if game_exe() else ""},
+        "start": start_basis(),
         "job": _running_job(),
     }
 
@@ -243,9 +317,14 @@ def os_start(url: str) -> None:
 
 
 def create_show(name: str, launch: bool = True) -> dict:
-    manifest = _manifest()
-    if manifest is None:
-        raise HTTPException(status_code=400, detail="还没有形象。请先上传一张立绘。")
+    basis = start_basis()
+    if not basis["ok"]:
+        raise HTTPException(
+            status_code=400,
+            detail="请先准备一样：一张人物图、一份数据库，或一个游戏程序。有其中一样就能开始。",
+        )
+    manifest = _manifest() or {}
+    mode = _focus_single(basis)
     name = (name or manifest.get("name") or "薇拉").strip() or "薇拉"
     port = int(config.get("server.port", 8765))
     host = str(config.get("server.host", "127.0.0.1"))
@@ -302,6 +381,10 @@ def create_show(name: str, launch: bool = True) -> dict:
 chcp 65001 >nul
 cd /d "%~dp0.."
 set "ROOT=%CD%"
+set "PY=%ROOT%\\runtime\\python\\python.exe"
+if not exist "%PY%" set "PY=%ROOT%\\runtime\\python.cmd"
+if not exist "%PY%" set "PY=python"
+"%PY%" -c "from server.studio import launch_game; launch_game()"
 netstat -ano | findstr ":{port}" | findstr "LISTENING" >nul
 if errorlevel 1 (
   start "vera" "%ROOT%\\start.bat" stage
@@ -339,6 +422,8 @@ start "" {origin}/panel
         "catalog": _rel(catalog),
         "settings": "config/app.yaml",
         "secrets": ".env",
+        "mode": mode,
+        "basis": {key: basis[key] for key in ("image", "database", "game", "ok")},
     }
     (SHOW_DIR / "show.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
     (SHOW_DIR / "说明.txt").write_text(
@@ -346,7 +431,8 @@ start "" {origin}/panel
             [
                 f"{name} · 直播间",
                 "",
-                "下次直播：双击「开始直播.bat」。",
+                "有其中一样就能开播：人物图、数据库，或游戏程序。",
+                "下次直播：双击「开始直播.bat」。选过游戏的话，它会一起打开。",
                 "服务没开的话，它会自己把服务拉起来，再弹出 1920×1080 的直播窗口。",
                 "改人设、密钥、房间号：双击「打开控制台.bat」，或回到工作室页面。",
                 "",
@@ -365,6 +451,8 @@ start "" {origin}/panel
     )
     log.info("已生成直播间文件夹：%s", SHOW_DIR)
     if launch:
+        if basis["game"]:
+            launch_game()
         open_app_window(f"{origin}/stage")
         if sys.platform == "win32":
             subprocess.Popen(["explorer.exe", str(SHOW_DIR)])
@@ -509,10 +597,49 @@ async def api_show_start(request: Request) -> dict:
     except Exception:  # noqa: BLE001
         body = {}
     name = ""
+    launch = True
     if isinstance(body, dict):
         name = str(body.get("name") or "")
-    info = create_show(name, launch=True)
+        if body.get("launch") is False:
+            launch = False
+    info = create_show(name, launch=launch)
     return {"ok": True, "show": info}
+
+
+@router.post("/api/game/pick")
+async def api_game_pick() -> dict:
+    if sys.platform != "win32":
+        raise HTTPException(status_code=400, detail="请把游戏程序的路径填进输入框")
+    script = (
+        "Add-Type -AssemblyName System.Windows.Forms; "
+        "$d = New-Object System.Windows.Forms.OpenFileDialog; "
+        "$d.Filter = '程序 (*.exe)|*.exe'; "
+        "$d.Title = '选择要一起打开的游戏'; "
+        "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $d.FileName }"
+    )
+    proc = await asyncio.create_subprocess_exec(
+        "powershell",
+        "-NoProfile",
+        "-STA",
+        "-Command",
+        script,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        out, err = await asyncio.wait_for(proc.communicate(), timeout=120)
+    except TimeoutError:
+        proc.kill()
+        raise HTTPException(status_code=400, detail="选择游戏超时") from None
+    chosen = (out or b"").decode("utf-8", errors="replace").strip()
+    if not chosen:
+        return {"ok": True, "exe": "", "name": ""}
+    path = Path(chosen)
+    if path.suffix.lower() != ".exe" or not path.is_file():
+        raise HTTPException(status_code=400, detail="请选择一个存在的游戏程序（.exe）")
+    config.set("game.exe", str(path))
+    config.save()
+    return {"ok": True, "exe": str(path), "name": path.name}
 
 
 @router.post("/api/show/open")

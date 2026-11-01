@@ -36,9 +36,13 @@ function renderInfo(info) {
   if (!$("in-mode").dataset.touched) {
     $("in-mode").value = settings.mode || "chat";
   }
-  if (!$("in-room").dataset.touched) {
-    $("in-room").value = settings.room_id || "";
+  if (!$("in-platform").dataset.touched) {
+    $("in-platform").value = settings.platform || "bilibili";
   }
+  if (!$("in-room").dataset.touched) {
+    $("in-room").value = settings.target || "";
+  }
+  roomHint();
   $("in-key").placeholder = settings.api_key_set ? "已写在 .env，留空则不修改" : "sk-… 不填也能播，只是没有大模型";
 
   const rows = [
@@ -50,12 +54,23 @@ function renderInfo(info) {
   ];
   $("paths").innerHTML = rows.map(([k, v]) => `<li><em>${k}</em><code>${v}</code></li>`).join("");
 
+  const start = info.start || {};
+  const ready = [
+    ["图片", !!start.image, start.image ? "已有形象" : "还没有"],
+    ["数据库", !!start.database, start.database ? `${start.books || 0} 本` : "还没有"],
+    ["游戏", !!start.game, start.game ? (start.game_name || "已选择") : "还没有"],
+  ];
+  $("ready").innerHTML = ready.map(([k, ok, v]) => `<li class="${ok ? "yes" : "no"}"><em>${k}</em><code>${v}</code></li>`).join("");
+  if (!$("in-game").dataset.touched) {
+    $("in-game").value = (info.game && info.game.exe) || "";
+  }
+
   if (avatar.ready && avatar.preview) {
     $("preview-row").hidden = false;
     $("preview").src = avatar.preview + "?t=" + encodeURIComponent(avatar.created || Date.now());
     $("avatar-meta").innerHTML = `<b>${avatar.name || "形象"}</b> 已可直播<br>${avatar.layers || 0} 个图层<br>${avatar.created || ""}`;
   }
-  $("btn-live").disabled = !avatar.ready;
+  $("btn-live").disabled = !start.ok;
   if (info.show && info.show.ready) {
     $("btn-folder").hidden = false;
     setHint($("live-hint"), "直播间文件夹已生成。下次双击「直播间\\开始直播.bat」。", "ok");
@@ -91,7 +106,26 @@ drop.addEventListener("drop", (ev) => {
 
 $("in-name").addEventListener("input", () => { $("in-name").dataset.touched = "1"; });
 $("in-room").addEventListener("input", () => { $("in-room").dataset.touched = "1"; });
+$("in-platform").addEventListener("change", () => {
+  $("in-platform").dataset.touched = "1";
+  roomHint();
+});
+
+const ROOM_HINT = {
+  off: "不接弹幕。推流仍然是把网页推进 OBS 或各平台的直播工具。",
+  bilibili: "填 B 站房间号，或直播间网址。一直没有弹幕时，再到控制台补 Cookie。",
+  youtube: "填直播网址、视频号，或 @频道。公开直播不用另办钥匙。",
+  twitch: "填频道名，或 twitch.tv/频道。公开聊天不用登录。",
+  kick: "填频道名，或 kick.com/频道。",
+  douyu: "填房间号，或斗鱼直播间网址。",
+};
+
+function roomHint() {
+  const platform = $("in-platform").value || "off";
+  $("room-hint").textContent = ROOM_HINT[platform] || "";
+}
 $("in-mode").addEventListener("change", () => { $("in-mode").dataset.touched = "1"; });
+$("in-game").addEventListener("input", () => { $("in-game").dataset.touched = "1"; });
 
 function showLog(job) {
   const box = $("gen-log");
@@ -150,8 +184,9 @@ $("btn-gen").addEventListener("click", async () => {
 
 $("btn-save").addEventListener("click", async () => {
   const patch = {
-    bilibili: { room_id: Number($("in-room").value || 0) },
     director: { mode: $("in-mode").value || "chat" },
+    game: { exe: $("in-game").value.trim() },
+    chat: { platform: $("in-platform").value || "off", target: $("in-room").value.trim() },
   };
   const key = $("in-key").value.trim();
   if (key) patch.deepseek = { api_key: key };
@@ -177,8 +212,9 @@ $("btn-live").addEventListener("click", async () => {
   try {
     const key = $("in-key").value.trim();
     const patch = {
-      bilibili: { room_id: Number($("in-room").value || 0) },
       director: { mode: $("in-mode").value || "chat" },
+      game: { exe: $("in-game").value.trim() },
+      chat: { platform: $("in-platform").value || "off", target: $("in-room").value.trim() },
     };
     if (key) patch.deepseek = { api_key: key };
     await readJSON(await fetch("/api/config", {
@@ -194,11 +230,30 @@ $("btn-live").addEventListener("click", async () => {
     const data = await readJSON(resp);
     $("in-key").value = "";
     $("btn-folder").hidden = false;
-    setHint($("live-hint"), "舞台已弹出。下次双击「直播间\\开始直播.bat」。", "ok");
+    const basis = (data.show && data.show.basis) || {};
+    const used = ["图片", "数据库", "游戏"].filter((label, i) => basis[["image", "database", "game"][i]]);
+    setHint($("live-hint"), `已开始（${used.join("、") || "已就绪"}）。舞台已弹出。下次双击「直播间\\开始直播.bat」。`, "ok");
   } catch (err) {
     setHint($("live-hint"), err.message, "bad");
   } finally {
     $("btn-live").disabled = false;
+  }
+});
+
+$("btn-game").addEventListener("click", async () => {
+  setHint($("save-hint"), "正在打开选择窗口…", "wait");
+  try {
+    const data = await readJSON(await fetch("/api/game/pick", { method: "POST" }));
+    if (!data.exe) {
+      setHint($("save-hint"), "没有选择游戏");
+      return;
+    }
+    $("in-game").value = data.exe;
+    $("in-game").dataset.touched = "1";
+    setHint($("save-hint"), "已选中游戏", "ok");
+    await loadInfo();
+  } catch (err) {
+    setHint($("save-hint"), err.message, "bad");
   }
 });
 

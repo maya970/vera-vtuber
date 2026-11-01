@@ -102,6 +102,10 @@ _DEFAULTS: dict[str, Any] = {
         "idle_sway": 1.0,
     },
     "catalog": {"path": "data/catalog.json", "top_k": 6},
+    "game": {"exe": ""},
+    "chat": {"platform": "bilibili", "target": ""},
+    "twitch": {"token": ""},
+    "youtube": {"api_key": ""},
     "ui": {"show_danmaku": True, "show_book_card": True, "subtitle": True, "theme": "studio"},
 }
 
@@ -137,6 +141,14 @@ class Config:
             self._data["bilibili"]["buvid3"] = os.environ["BILI_BUVID3"]
         if os.environ.get("BILI_ROOM_ID"):
             self._data["bilibili"]["room_id"] = int(os.environ["BILI_ROOM_ID"] or 0)
+        if "GAME_EXE" in os.environ:
+            self._data.setdefault("game", {})["exe"] = os.environ.get("GAME_EXE", "").strip()
+        if "CHAT_TARGET" in os.environ:
+            self._data.setdefault("chat", {})["target"] = os.environ.get("CHAT_TARGET", "").strip()
+        if os.environ.get("TWITCH_TOKEN"):
+            self._data.setdefault("twitch", {})["token"] = os.environ["TWITCH_TOKEN"].strip()
+        if os.environ.get("YOUTUBE_API_KEY"):
+            self._data.setdefault("youtube", {})["api_key"] = os.environ["YOUTUBE_API_KEY"].strip()
 
     @property
     def data(self) -> dict[str, Any]:
@@ -185,6 +197,34 @@ class Config:
         if buvid:
             updates["BILI_BUVID3"] = buvid
         bili["buvid3"] = ""
+        game = data.setdefault("game", {})
+        exe = str(game.get("exe") or "").strip()
+        updates["GAME_EXE"] = exe
+        game["exe"] = ""
+        if exe:
+            os.environ["GAME_EXE"] = exe
+        else:
+            os.environ.pop("GAME_EXE", None)
+        chat_cfg = data.setdefault("chat", {})
+        target = str(chat_cfg.get("target") or "").strip()
+        updates["CHAT_TARGET"] = target
+        chat_cfg["target"] = ""
+        if target:
+            os.environ["CHAT_TARGET"] = target
+        else:
+            os.environ.pop("CHAT_TARGET", None)
+        twitch = data.setdefault("twitch", {})
+        token = str(twitch.get("token") or "").strip()
+        if token:
+            updates["TWITCH_TOKEN"] = token
+            os.environ["TWITCH_TOKEN"] = token
+        twitch["token"] = ""
+        youtube = data.setdefault("youtube", {})
+        yt_key = str(youtube.get("api_key") or "").strip()
+        if yt_key:
+            updates["YOUTUBE_API_KEY"] = yt_key
+            os.environ["YOUTUBE_API_KEY"] = yt_key
+        youtube["api_key"] = ""
         if updates:
             _write_env(updates)
         return data
@@ -207,6 +247,12 @@ class Config:
         sess = data.get("bilibili", {}).get("sessdata") or ""
         data["bilibili"]["sessdata_set"] = bool(sess)
         data["bilibili"]["sessdata"] = ""
+        twitch = data.setdefault("twitch", {})
+        twitch["token_set"] = bool(twitch.get("token"))
+        twitch["token"] = ""
+        youtube = data.setdefault("youtube", {})
+        youtube["api_key_set"] = bool(youtube.get("api_key"))
+        youtube["api_key"] = ""
         return data
 
     @property

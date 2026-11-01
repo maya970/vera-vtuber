@@ -49,6 +49,11 @@ avatar:
 catalog:
   path: data/catalog.json
   top_k: 6
+game:
+  exe: ''
+chat:
+  platform: bilibili
+  target: ''
 ui:
   show_danmaku: true
   show_book_card: true

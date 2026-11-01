@@ -28,7 +28,7 @@
     <ul class="status-list" id="status-list">
       <li><b>DeepSeek</b><span class="tag wait" id="st-deepseek">检测中</span></li>
       <li><b>语音合成</b><span class="tag wait" id="st-tts">检测中</span></li>
-      <li><b>B 站弹幕</b><span class="tag wait" id="st-bili">未连接</span></li>
+      <li><b>弹幕</b><span class="tag wait" id="st-bili">未连接</span></li>
       <li><b>作品目录</b><span class="tag" id="st-catalog">—</span></li>
       <li><b>直播形象</b><span class="tag" id="st-avatar">—</span></li>
       <li><b>观众</b><span class="tag" id="st-audience">—</span></li>
@@ -43,10 +43,21 @@
 
   <section class="card">
     <h2>直播设置</h2>
-    <label>直播间号（短号或真实房间号）
-      <input id="in-room" type="number" placeholder="例如 123456" />
+    <label>弹幕平台
+      <select id="in-platform">
+        <option value="off">不接弹幕</option>
+        <option value="bilibili">哔哩哔哩</option>
+        <option value="youtube">YouTube</option>
+        <option value="twitch">Twitch</option>
+        <option value="kick">Kick</option>
+        <option value="douyu">斗鱼</option>
+      </select>
     </label>
-    <label>B 站 Cookie · SESSDATA（可选）
+    <label>直播间
+      <input id="in-room" type="text" placeholder="房间号、频道名或直播网址" />
+    </label>
+    <p class="hint" id="room-hint"></p>
+    <label>B 站 Cookie · SESSDATA（可选，只在哔哩哔哩时用）
       <input id="in-sess" type="password" placeholder="留空则不修改" />
     </label>
     <label>DeepSeek API Key
@@ -88,10 +99,10 @@
     </label>
     <div class="row wrap">
       <button class="btn" id="btn-next">让她主动说一句</button>
-      <button class="btn" id="btn-bili">重连 B 站</button>
+      <button class="btn" id="btn-bili">重连弹幕</button>
       <button class="btn ghost" id="btn-reload">刷新目录</button>
     </div>
-    <p class="hint">舞台画面用 OBS「浏览器源」加载 <code id="stage-url">http://127.0.0.1:8765/stage</code>（1920×1080）。</p>
+    <p class="hint">推流就是把这个网页送出去，YouTube、Twitch、Kick、斗鱼、B 站都可以。舞台地址 <code id="stage-url">http://127.0.0.1:8765/stage</code>（1920×1080）。</p>
   </section>
 
   <section class="card">
