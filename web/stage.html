@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>虚拟主播</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/web/stage.css" />
+<script type="importmap">
+  { "imports": { "three": "/web/vendor/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="stage" class="bg-library">
+  <div id="backdrop"></div>
+  <div id="vignette"></div>
+  <canvas id="gl"></canvas>
+
+  <header id="live-badge">
+    <span class="dot"></span><span class="label">LIVE</span>
+    <span class="sub" id="live-sub">闲聊</span>
+  </header>
+
+  <aside id="book-card" class="hidden">
+    <div class="card-top">
+      <span class="card-kicker">本 期 藏 书</span>
+      <span class="card-index" id="book-index">NO. 0000</span>
+    </div>
+    <h1 id="book-title">——</h1>
+    <div class="card-meta">
+      <span id="book-author">——</span>
+      <span class="sep">/</span>
+      <span id="book-words">——</span>
+      <span class="sep">/</span>
+      <span id="book-status">——</span>
+    </div>
+    <div class="card-score">
+      <div class="score-num" id="book-score">0.0</div>
+      <div class="score-side">
+        <div class="score-stars" id="book-stars"></div>
+        <div class="score-raters" id="book-raters">0 人评分</div>
+      </div>
+    </div>
+    <div class="card-tags" id="book-tags"></div>
+    <div class="card-foot">
+      <span class="seal">✦</span>
+      <span>冒险者公会 · 地下书库</span>
+    </div>
+  </aside>
+
+  <div id="danmaku-feed" aria-live="polite"></div>
+
+  <footer id="subtitle-wrap">
+    <div id="speaker">主播</div>
+    <div id="subtitle"></div>
+  </footer>
+
+  <div id="status-pill"><span class="pulse"></span><span id="status-text">待机</span></div>
+
+  <div id="unlock"><div class="unlock-inner">点击画面开启声音<small>OBS 里不需要这一步</small></div></div>
+
+  <div id="boot-error" class="hidden">
+    <h2>还没有直播形象</h2>
+    <p>回到首页，上传一张人物图，等它生成完再来。</p>
+    <p>生成好之后，点「开始直播」就会弹出这个画面。</p>
+  </div>
+
+  <div id="debug" class="hidden"></div>
+</div>
+<script type="module" src="/web/stage.js"></script>
+</body>
+</html>

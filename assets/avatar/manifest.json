@@ -1,0 +1,226 @@
+{
+ "version": 1,
+ "name": "薇拉",
+ "created": "2026-10-31T14:44:42",
+ "canvas": {
+  "width": 342,
+  "height": 448
+ },
+ "source": {
+  "crop": [
+   276,
+   158,
+   618,
+   606
+  ],
+  "width": 768,
+  "height": 768
+ },
+ "backdrop": "backdrop.jpg",
+ "layers": [
+  {
+   "id": "00_back_hair",
+   "tag": "back hair",
+   "file": "layers/00_back_hair.png",
+   "x": 34,
+   "y": 24,
+   "w": 247,
+   "h": 320,
+   "order": 0,
+   "z": -0.55,
+   "part": "hair_back",
+   "group": "head"
+  },
+  {
+   "id": "01_topwear",
+   "tag": "topwear",
+   "file": "layers/01_topwear.png",
+   "x": 25,
+   "y": 140,
+   "w": 292,
+   "h": 284,
+   "order": 1,
+   "z": -0.4654,
+   "part": "cloth",
+   "group": "body"
+  },
+  {
+   "id": "02_eyebrow",
+   "tag": "eyebrow",
+   "file": "layers/02_eyebrow.png",
+   "x": 110,
+   "y": 88,
+   "w": 63,
+   "h": 21,
+   "order": 2,
+   "z": -0.3808,
+   "part": "brow",
+   "group": "head"
+  },
+  {
+   "id": "03_neck",
+   "tag": "neck",
+   "file": "layers/03_neck.png",
+   "x": 145,
+   "y": 110,
+   "w": 40,
+   "h": 50,
+   "order": 3,
+   "z": -0.2962,
+   "part": "neck",
+   "group": "body"
+  },
+  {
+   "id": "04_ears",
+   "tag": "ears",
+   "file": "layers/04_ears.png",
+   "x": 111,
+   "y": 91,
+   "w": 89,
+   "h": 44,
+   "order": 4,
+   "z": -0.2115,
+   "part": "ear",
+   "group": "head"
+  },
+  {
+   "id": "05_face",
+   "tag": "face",
+   "file": "layers/05_face.png",
+   "x": 103,
+   "y": 50,
+   "w": 86,
+   "h": 101,
+   "order": 5,
+   "z": -0.1269,
+   "part": "face",
+   "group": "head"
+  },
+  {
+   "id": "06_mouth",
+   "tag": "mouth",
+   "file": "layers/06_mouth.png",
+   "x": 145,
+   "y": 131,
+   "w": 14,
+   "h": 8,
+   "order": 6,
+   "z": -0.0423,
+   "part": "mouth",
+   "group": "head"
+  },
+  {
+   "id": "07_nose",
+   "tag": "nose",
+   "file": "layers/07_nose.png",
+   "x": 138,
+   "y": 117,
+   "w": 12,
+   "h": 14,
+   "order": 7,
+   "z": 0.0423,
+   "part": "nose",
+   "group": "head"
+  },
+  {
+   "id": "08_eyewhite",
+   "tag": "eyewhite",
+   "file": "layers/08_eyewhite.png",
+   "x": 120,
+   "y": 99,
+   "w": 55,
+   "h": 25,
+   "order": 8,
+   "z": 0.1269,
+   "part": "eye",
+   "group": "head"
+  },
+  {
+   "id": "09_eyelash",
+   "tag": "eyelash",
+   "file": "layers/09_eyelash.png",
+   "x": 113,
+   "y": 94,
+   "w": 66,
+   "h": 31,
+   "order": 9,
+   "z": 0.2115,
+   "part": "eye",
+   "group": "head"
+  },
+  {
+   "id": "10_irides",
+   "tag": "irides",
+   "file": "layers/10_irides.png",
+   "x": 124,
+   "y": 99,
+   "w": 47,
+   "h": 24,
+   "order": 10,
+   "z": 0.2962,
+   "part": "eye",
+   "group": "head"
+  },
+  {
+   "id": "11_front_hair",
+   "tag": "front hair",
+   "file": "layers/11_front_hair.png",
+   "x": 91,
+   "y": 33,
+   "w": 133,
+   "h": 187,
+   "order": 11,
+   "z": 0.3808,
+   "part": "hair_front",
+   "group": "head"
+  },
+  {
+   "id": "12_headwear",
+   "tag": "headwear",
+   "file": "layers/12_headwear.png",
+   "x": 172,
+   "y": 56,
+   "w": 36,
+   "h": 38,
+   "order": 12,
+   "z": 0.4654,
+   "part": "headwear",
+   "group": "head"
+  },
+  {
+   "id": "13_handwear",
+   "tag": "handwear",
+   "file": "layers/13_handwear.png",
+   "x": 195,
+   "y": 205,
+   "w": 65,
+   "h": 142,
+   "order": 13,
+   "z": 0.55,
+   "part": "hand",
+   "group": "body"
+  }
+ ],
+ "anchors": {
+  "feet": {
+   "x": 171.0,
+   "y": 443.52
+  },
+  "head": {
+   "x": 171.0,
+   "y": 134.4
+  },
+  "neck": {
+   "x": 171.0,
+   "y": 188.16
+  },
+  "mouth": {
+   "x": 152.0,
+   "y": 135.0
+  },
+  "eyes": {
+   "x": 146.0,
+   "y": 109.5
+  }
+ }
+}

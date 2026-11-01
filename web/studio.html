@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>虚拟主播 · 开盒即用</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/web/studio.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">✦</span>
+    <div>
+      <h1>虚拟主播</h1>
+      <p>闲聊、玩游戏、讲书，上传一张图就能开播</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <a class="btn ghost" href="/panel">控制台</a>
+    <a class="btn ghost" href="/stage" target="_blank">舞台</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h2>打开就能播</h2>
+    <p>双击「打开.bat」。可以闲聊，也可以在玩游戏时把她放在旁边。上传一张图，点开始直播，会弹出舞台并生成「直播间」文件夹。不会操作的话，打开项目里的「教程.md」。</p>
+  </section>
+
+  <ol class="steps">
+    <li class="card">
+      <div class="step-no">01</div>
+      <h3>上传一张图</h3>
+      <p class="lead">全身或半身立绘都可以。png / jpg 会自动分层；已经分好层的 psd 会直接做成形象。</p>
+      <label class="drop" id="drop">
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,.psd" />
+        <div>
+          <strong id="drop-title">点击或拖入立绘</strong>
+          <span>生成时会连上 see-through，通常要几分钟</span>
+        </div>
+      </label>
+      <div class="preview-row" id="preview-row" hidden>
+        <img id="preview" alt="形象预览" />
+        <div class="meta" id="avatar-meta"></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <label style="flex:1;margin:0">主播名字
+          <input id="in-name" type="text" value="薇拉" />
+        </label>
+        <button class="btn primary" id="btn-gen" disabled style="align-self:end">生成直播形象</button>
+      </div>
+      <p class="hint" id="gen-hint"></p>
+      <div class="log-box" id="gen-log" hidden></div>
+    </li>
+
+    <li class="card">
+      <div class="step-no">02</div>
+      <h3>数据库和接口，都在这个文件夹</h3>
+      <p class="lead">不用另找配置。钥匙写在你自己电脑的 <code>.env</code> 里，不会写进要上传的文件。玩游戏和闲聊不用准备书库；只有选「讲书」才会用到目录。</p>
+      <label>这次直播做什么
+        <select id="in-mode">
+          <option value="chat">闲聊。接弹幕，不讲书</option>
+          <option value="game">玩游戏。形象挂在游戏旁边</option>
+          <option value="book">讲书。安静时会介绍一本书</option>
+        </select>
+      </label>
+      <ul class="paths" id="paths"></ul>
+      <div class="grid2" style="margin-top:16px">
+        <label>DeepSeek API Key
+          <input id="in-key" type="password" placeholder="sk-… 留空则不修改" autocomplete="off" />
+        </label>
+        <label>B 站直播间号
+          <input id="in-room" type="number" placeholder="例如 123456" />
+        </label>
+      </div>
+      <div class="row">
+        <button class="btn" id="btn-save">保存到这个文件夹</button>
+        <span class="hint" id="save-hint"></span>
+      </div>
+    </li>
+
+    <li class="card">
+      <div class="step-no">03</div>
+      <h3>开始直播</h3>
+      <p class="lead">弹出 1920×1080 的舞台窗口，并在项目里生成「直播间」文件夹。下次双击里面的「开始直播.bat」即可，不必重新上传。</p>
+      <div class="row">
+        <button class="btn primary" id="btn-live" disabled>开始直播</button>
+        <button class="btn ghost" id="btn-folder" hidden>打开直播间文件夹</button>
+      </div>
+      <p class="hint" id="live-hint"></p>
+    </li>
+
+    <li class="card">
+      <div class="step-no">可选</div>
+      <h3>StandRig 高可动</h3>
+      <p class="lead">绘爱さやか用下面这句提示词，让 AI 按分层 PSD 在 StandRig 里做带物理的模型，大约一个半小时。分层完成后，提示词和 PSD 会放进 <code>assets/standrig/工作区</code>。</p>
+      <pre class="prompt" id="prompt"></pre>
+      <div class="links">
+        <a id="link-standrig" href="https://github.com/sayaka-aiart/StandRig" target="_blank" rel="noreferrer">StandRig</a>
+        <a id="link-connect" href="https://github.com/sayaka-aiart/standrig-connect" target="_blank" rel="noreferrer">StandRig Connect（追踪 / 口型 / OBS）</a>
+        <a id="link-tweet" href="https://x.com/sayaka_aiart/status/2116165983090180419" target="_blank" rel="noreferrer">原推文</a>
+      </div>
+      <p class="hint" id="standrig-hint"></p>
+    </li>
+  </ol>
+</main>
+<script src="/web/studio.js"></script>
+</body>
+</html>

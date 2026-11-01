@@ -1,0 +1,103 @@
+{
+ "psd": "assets\\source\\index002.psd",
+ "layers": [
+  {
+   "tag": "back hair",
+   "file": "back_hair.png"
+  },
+  {
+   "tag": "bottomwear",
+   "file": "bottomwear.png"
+  },
+  {
+   "tag": "ears",
+   "file": "ears.png"
+  },
+  {
+   "tag": "earwear",
+   "file": "earwear.png"
+  },
+  {
+   "tag": "eyebrow",
+   "file": "eyebrow.png"
+  },
+  {
+   "tag": "eyelash",
+   "file": "eyelash.png"
+  },
+  {
+   "tag": "eyewear",
+   "file": "eyewear.png"
+  },
+  {
+   "tag": "eyewhite",
+   "file": "eyewhite.png"
+  },
+  {
+   "tag": "face",
+   "file": "face.png"
+  },
+  {
+   "tag": "footwear",
+   "file": "footwear.png"
+  },
+  {
+   "tag": "front hair",
+   "file": "front_hair.png"
+  },
+  {
+   "tag": "handwear",
+   "file": "handwear.png"
+  },
+  {
+   "tag": "head",
+   "file": "head.png"
+  },
+  {
+   "tag": "headwear",
+   "file": "headwear.png"
+  },
+  {
+   "tag": "irides",
+   "file": "irides.png"
+  },
+  {
+   "tag": "legwear",
+   "file": "legwear.png"
+  },
+  {
+   "tag": "mouth",
+   "file": "mouth.png"
+  },
+  {
+   "tag": "neck",
+   "file": "neck.png"
+  },
+  {
+   "tag": "neckwear",
+   "file": "neckwear.png"
+  },
+  {
+   "tag": "nose",
+   "file": "nose.png"
+  },
+  {
+   "tag": "objects",
+   "file": "objects.png"
+  },
+  {
+   "tag": "tail",
+   "file": "tail.png"
+  },
+  {
+   "tag": "topwear",
+   "file": "topwear.png"
+  },
+  {
+   "tag": "wings",
+   "file": "wings.png"
+  }
+ ],
+ "image": "index002.jpg",
+ "resolution": 768
+}

@@ -1,0 +1,56 @@
+server:
+  host: 127.0.0.1
+  port: 8765
+deepseek:
+  api_key: ''
+  base_url: https://api.deepseek.com
+  model: deepseek-chat
+  temperature: 1.0
+  max_tokens: 320
+  timeout: 60
+bilibili:
+  enable: true
+  room_id: 0
+  uid: 0
+  sessdata: ''
+  buvid3: ''
+  reconnect: true
+  read_gifts: true
+  read_enter: true
+  ignore_users: []
+tts:
+  engine: edge
+  voice: zh-CN-XiaoyiNeural
+  rate: +10%
+  pitch: +12Hz
+  volume: +0%
+  cache: true
+director:
+  mode: chat
+  idle_book_after: 30
+  audience_window: 600
+  danmaku_priority: true
+  max_queue: 6
+  per_user_cooldown: 25
+  global_cooldown: 1.5
+  intro_min_score: 6.5
+  intro_min_raters: 20
+  history_ratio: 0.75
+  max_sentences: 5
+  super_chat_first: true
+avatar:
+  manifest: assets/avatar/manifest.json
+  camera_fov: 26
+  parallax: 1.0
+  blink_interval:
+  - 3.2
+  - 7.5
+  idle_sway: 1.0
+catalog:
+  path: data/catalog.json
+  top_k: 6
+ui:
+  show_danmaku: true
+  show_book_card: true
+  subtitle: true
+  theme: studio

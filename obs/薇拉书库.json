@@ -1,0 +1,57 @@
+{
+    "current_program_scene": "薇拉书库",
+    "current_scene": "薇拉书库",
+    "current_transition": "Fade",
+    "groups": [],
+    "name": "薇拉书库",
+    "preview_locked": false,
+    "quick_transitions": [],
+    "saved_projectors": [],
+    "scaling_enabled": false,
+    "scaling_level": 0,
+    "scaling_off_x": 0.0,
+    "scaling_off_y": 0.0,
+    "scene_order": [
+        {
+            "name": "薇拉书库"
+        }
+    ],
+    "sources": [
+        {
+            "balance": 0.5,
+            "deinterlace_field_order": 0,
+            "deinterlace_mode": 0,
+            "enabled": true,
+            "filters": [],
+            "flags": 0,
+            "hotkeys": {},
+            "id": "browser_source",
+            "mixers": 0,
+            "monitoring_type": 0,
+            "muted": false,
+            "name": "薇拉舞台",
+            "prev_ver": 520093697,
+            "private_settings": {},
+            "push-to-mute": false,
+            "push-to-mute-delay": 0,
+            "push-to-talk": false,
+            "push-to-talk-delay": 0,
+            "settings": {
+                "fps": 30,
+                "height": 1080,
+                "width": 1920,
+                "url": "http://127.0.0.1:8765/stage",
+                "shutdown": false,
+                "restart_when_active": false,
+                "css": "body { margin: 0; background: transparent; }",
+                "reroute_audio": true
+            },
+            "sync": 0,
+            "uuid": "27ebd880-cde1-406b-84a7-bd57e15c4367",
+            "versioned_id": "browser_source",
+            "volume": 1.0
+        }
+    ],
+    "transition_duration": 300,
+    "transitions": []
+}

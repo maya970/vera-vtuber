@@ -1,0 +1,28 @@
+# 核心服务
+fastapi>=0.115
+uvicorn[standard]>=0.32
+websockets>=13
+python-multipart>=0.0.9
+
+# DeepSeek（OpenAI 兼容协议）
+openai>=1.60
+
+# 语音
+edge-tts>=7.0
+
+# B 站弹幕
+aiohttp>=3.10
+brotli>=1.1
+
+# 目录抓取 / 素材处理
+requests>=2.32
+beautifulsoup4>=4.12
+lxml>=5.3
+pillow>=11.0
+numpy>=2.0
+psd-tools>=1.10
+gradio_client>=1.7
+
+# 配置
+pyyaml>=6.0
+python-dotenv>=1.0

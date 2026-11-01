@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>虚拟主播 · 控制台</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/web/panel.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">✦</span>
+    <div>
+      <h1>虚拟主播</h1>
+      <p>闲聊、玩游戏或讲书 · 弹幕 · 语音</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <a class="btn ghost" href="/">工作室</a>
+    <a class="btn ghost" href="/stage" target="_blank">打开直播画面</a>
+    <div class="status-dot" id="svc-dot"><span></span><em id="svc-text">检测中</em></div>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2>链路状态</h2>
+    <ul class="status-list" id="status-list">
+      <li><b>DeepSeek</b><span class="tag wait" id="st-deepseek">检测中</span></li>
+      <li><b>语音合成</b><span class="tag wait" id="st-tts">检测中</span></li>
+      <li><b>B 站弹幕</b><span class="tag wait" id="st-bili">未连接</span></li>
+      <li><b>作品目录</b><span class="tag" id="st-catalog">—</span></li>
+      <li><b>直播形象</b><span class="tag" id="st-avatar">—</span></li>
+      <li><b>观众</b><span class="tag" id="st-audience">—</span></li>
+      <li><b>API 调用</b><span class="tag" id="st-api">0 次</span></li>
+      <li><b>已讲过</b><span class="tag" id="st-played">0 本</span></li>
+    </ul>
+    <div class="mini-actions">
+      <button class="btn small" id="btn-health">重新检测</button>
+      <button class="btn small ghost" id="btn-voices">刷新音色</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>直播设置</h2>
+    <label>直播间号（短号或真实房间号）
+      <input id="in-room" type="number" placeholder="例如 123456" />
+    </label>
+    <label>B 站 Cookie · SESSDATA（可选）
+      <input id="in-sess" type="password" placeholder="留空则不修改" />
+    </label>
+    <label>DeepSeek API Key
+      <input id="in-key" type="password" placeholder="sk-…（留空则不修改）" />
+    </label>
+    <label>音色
+      <select id="in-voice"></select>
+    </label>
+    <label>这次直播做什么
+      <select id="in-mode">
+        <option value="chat">闲聊</option>
+        <option value="game">玩游戏</option>
+        <option value="book">讲书</option>
+      </select>
+    </label>
+    <label>空闲多少秒后主动说话
+      <input id="in-idle" type="number" min="5" max="600" />
+    </label>
+    <div class="row">
+      <button class="btn primary" id="btn-save">保存设置</button>
+      <span class="hint" id="save-hint"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>手动操作</h2>
+    <label>让她说一句
+      <div class="inline">
+        <input id="in-say" type="text" placeholder="今天想聊聊《诡秘之主》…" />
+        <button class="btn" id="btn-say">发送</button>
+      </div>
+    </label>
+    <label>模拟观众弹幕
+      <div class="inline">
+        <input id="in-user" type="text" value="测试观众" style="max-width:120px" />
+        <input id="in-dm" type="text" placeholder="有没有类似《诡秘之主》的书？" />
+        <button class="btn" id="btn-dm">发送</button>
+      </div>
+    </label>
+    <div class="row wrap">
+      <button class="btn" id="btn-next">让她主动说一句</button>
+      <button class="btn" id="btn-bili">重连 B 站</button>
+      <button class="btn ghost" id="btn-reload">刷新目录</button>
+    </div>
+    <p class="hint">舞台画面用 OBS「浏览器源」加载 <code id="stage-url">http://127.0.0.1:8765/stage</code>（1920×1080）。</p>
+  </section>
+
+  <section class="card">
+    <h2>最近讲过</h2>
+    <ul class="played" id="played-list"><li class="empty">还没有开播记录</li></ul>
+  </section>
+
+  <section class="card logs">
+    <h2>运行日志</h2>
+    <div class="log-box" id="log-box"></div>
+  </section>
+</main>
+<script src="/web/panel.js"></script>
+</body>
+</html>
